@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#4F46E5">
-    <title>ScoutPass Scanner</title>
+    <title>ScoutPass Scanner | Camera Pro</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -27,41 +27,32 @@
             --text-sub: #64748B;
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             height: 100dvh;
-            /* Dynamic Viewport Height for Mobile */
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* --- LAYOUT UTILS --- */
         .app-container {
             flex: 1;
             display: flex;
             flex-direction: column;
             padding: 20px;
             max-width: 480px;
-            /* Limits width on tablets/desktop */
             margin: 0 auto;
             width: 100%;
             overflow-y: auto;
             position: relative;
         }
 
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
 
-        /* --- LOGIN SCREEN --- */
         #loginScreen {
             justify-content: center;
             align-items: center;
@@ -71,237 +62,69 @@
         }
 
         .login-logo {
-            width: 72px;
-            height: 72px;
+            width: 72px; height: 72px;
             background: linear-gradient(135deg, var(--primary), #818CF8);
-            border-radius: 20px;
-            color: white;
-            font-size: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 24px;
-            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+            border-radius: 20px; color: white;
+            font-size: 32px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 24px; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
         }
 
-        /* --- SCANNER UI --- */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .status-badge {
-            background: rgba(79, 70, 229, 0.1);
-            color: var(--primary);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 
         .camera-wrapper {
-            width: 100%;
-            aspect-ratio: 1/1;
-            background: black;
-            border-radius: 24px;
-            overflow: hidden;
-            position: relative;
+            width: 100%; aspect-ratio: 1/1;
+            background: black; border-radius: 24px;
+            overflow: hidden; position: relative;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            border: 2px solid white;
-            margin-bottom: 20px;
+            border: 2px solid white; margin-bottom: 15px;
         }
 
-        #reader {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        #reader { width: 100%; height: 100%; object-fit: cover; }
 
-        /* --- CONTROLS --- */
         .control-panel {
             background: var(--surface);
-            padding: 20px;
-            border-radius: 24px;
+            padding: 18px; border-radius: 24px;
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
         }
 
-        .form-control,
-        .form-select {
-            background-color: #F1F5F9;
-            border: none;
-            padding: 14px;
-            border-radius: 14px;
-            font-size: 16px;
-            /* Prevents zoom on iOS */
-            margin-bottom: 12px;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            box-shadow: 0 0 0 2px var(--primary);
-            background-color: white;
+        .form-control, .form-select {
+            background-color: #F1F5F9; border: none;
+            padding: 12px; border-radius: 12px;
+            font-size: 15px; margin-bottom: 10px;
         }
 
         .btn-primary-action {
-            background: var(--primary);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 16px;
-            border-radius: 16px;
-            font-weight: 600;
-            font-size: 16px;
+            background: var(--primary); color: white; border: none;
+            width: 100%; padding: 16px; border-radius: 16px;
+            font-weight: 600; font-size: 16px;
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-            transition: transform 0.1s;
-        }
-
-        .btn-primary-action:active {
-            transform: scale(0.98);
         }
 
         .icon-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            border: none;
-            background: #1E293B;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
+            width: 45px; height: 45px; border-radius: 12px;
+            border: none; background: #1E293B; color: white;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* --- MODALS & OVERLAYS --- */
         .custom-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 3000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px); z-index: 3000;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
         }
 
         .result-card {
-            background: white;
-            width: 100%;
-            max-width: 340px;
-            border-radius: 28px;
-            padding: 32px 24px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: white; width: 100%; max-width: 340px;
+            border-radius: 28px; padding: 32px 24px; text-align: center;
         }
 
-        @keyframes popUp {
-            from {
-                transform: scale(0.8);
-                opacity: 0;
-            }
+        .action-grid { display: grid; gap: 10px; margin-top: 20px; }
+        .action-btn { padding: 14px; border: none; border-radius: 14px; font-weight: 600; }
+        .btn-in { background: #DCFCE7; color: #166534; }
+        .btn-out { background: #FEE2E2; color: #991B1B; }
 
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
+        .footer { margin-top: auto; padding-top: 15px; text-align: center; font-size: 11px; color: var(--text-sub); }
 
-        .scout-avatar {
-            width: 80px;
-            height: 80px;
-            background: #EEF2FF;
-            color: var(--primary);
-            border-radius: 50%;
-            font-size: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-        }
-
-        .action-grid {
-            display: grid;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .action-btn {
-            padding: 14px;
-            border: none;
-            border-radius: 14px;
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        .btn-in {
-            background: #DCFCE7;
-            color: #166534;
-        }
-
-        .btn-out {
-            background: #FEE2E2;
-            color: #991B1B;
-        }
-
-        .btn-neutral {
-            background: #F1F5F9;
-            color: #334155;
-        }
-
-        /* --- LOCK SCREEN --- */
-        #lockedOverlay {
-            background: #EF4444;
-            color: white;
-            z-index: 5000;
-            flex-direction: column;
-        }
-
-        /* --- FOOTER --- */
-        .footer {
-            margin-top: auto;
-            padding-top: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-sub);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .footer strong {
-            color: var(--text-main);
-            font-weight: 600;
-        }
-
-        /* --- MISSING ALERT --- */
-        #missingAlert {
-            background: #EF4444;
-            color: white;
-            z-index: 4000;
-            text-align: center;
-        }
-
-        .alert-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
+        #missingAlert { background: #EF4444; color: white; z-index: 4000; text-align: center; }
     </style>
 </head>
 
@@ -310,33 +133,24 @@
     <div id="lockedOverlay" class="custom-overlay hidden">
         <i class="bi bi-lock-fill" style="font-size: 64px; margin-bottom: 20px;"></i>
         <h2 class="fw-bold">SYSTEM LOCKED</h2>
-        <p class="opacity-75">Scanning is paused by Admin</p>
+        <p class="opacity-75">Paused by Admin</p>
     </div>
 
     <div id="loginScreen" class="app-container">
         <div class="login-logo"><i class="bi bi-qr-code-scan"></i></div>
         <h3 class="fw-bold mb-1">ScoutPass</h3>
-        <p class="text-muted mb-4 small">Staff Access Portal</p>
-
+        <p class="text-muted mb-4 small">Staff Portal</p>
         <div class="w-100">
-            <input type="email" id="stfEmail" class="form-control" placeholder="Staff Email">
+            <input type="email" id="stfEmail" class="form-control" placeholder="Email">
             <input type="password" id="stfPass" class="form-control" placeholder="Password">
             <button onclick="staffLogin()" class="btn-primary-action mt-2">Sign In</button>
-        </div>
-
-        <div class="footer">
-            Designed & Developed by<br><strong>Madhawa Basnayake</strong>
         </div>
     </div>
 
     <div id="mainScreen" class="app-container hidden">
         <div class="top-bar">
-            <div>
-                <h5 class="fw-bold m-0">Scanner</h5>
-                <span class="status-badge"><span id="cameraName">Rear Camera</span></span>
-            </div>
-            <button onclick="signOut()"
-                class="btn btn-light btn-sm rounded-pill px-3 fw-bold text-danger border">Logout</button>
+            <h5 class="fw-bold m-0">Scanner</h5>
+            <button onclick="signOut()" class="btn btn-light btn-sm rounded-pill px-3 fw-bold text-danger border">Logout</button>
         </div>
 
         <div class="camera-wrapper">
@@ -344,46 +158,41 @@
         </div>
 
         <div class="control-panel">
-            <div class="d-flex gap-2 mb-3">
-                <select id="eventSelect" class="form-select m-0" onchange="updateEvent()">
-                    <option value="" disabled selected>Select Event...</option>
+            <div class="d-flex gap-2 mb-2">
+                <select id="camSelect" class="form-select m-0" onchange="switchCamera(this.value)">
+                    <option value="">Detecting Cameras...</option>
                 </select>
                 <button class="icon-btn" onclick="toggleFlash()"><i class="bi bi-lightning-fill"></i></button>
             </div>
 
+            <select id="eventSelect" class="form-select mb-2" onchange="updateEvent()">
+                <option value="" disabled selected>Select Event...</option>
+            </select>
+
             <div class="input-group">
-                <input type="text" id="manualInput" class="form-control m-0" placeholder="Type ID (e.g. KG/01)"
-                    style="border-radius: 14px 0 0 14px;">
-                <button onclick="handleManual()" class="btn btn-primary px-4" style="border-radius: 0 14px 14px 0;"><i
-                        class="bi bi-arrow-right"></i></button>
+                <input type="text" id="manualInput" class="form-control m-0" placeholder="Type ID" style="border-radius: 12px 0 0 12px;">
+                <button onclick="handleManual()" class="btn btn-primary px-3" style="border-radius: 0 12px 12px 0;"><i class="bi bi-arrow-right"></i></button>
             </div>
         </div>
 
-        <div class="footer">
-            Designed & Developed by<br><strong>Madhawa Basnayake</strong>
-        </div>
+        <div class="footer">Developed by <strong>Madhawa Basnayake</strong></div>
     </div>
 
     <div id="resultModal" class="custom-overlay hidden">
         <div class="result-card">
             <div class="scout-avatar"><i class="bi bi-person-fill"></i></div>
             <h4 class="fw-bold mb-0" id="resName">Scout Name</h4>
-            <div class="text-muted small mb-4 font-monospace" id="resID">KG/12/345</div>
-
-            <div id="actionButtons" class="action-grid">
-            </div>
-
-            <button onclick="closeModal()" class="btn btn-link text-muted text-decoration-none mt-3"
-                style="font-size: 14px">Cancel Scan</button>
+            <div class="text-muted small mb-4" id="resID">ID</div>
+            <div id="actionButtons" class="action-grid"></div>
+            <button onclick="closeModal()" class="btn btn-link text-muted mt-3">Cancel</button>
         </div>
     </div>
 
     <div id="missingAlert" class="custom-overlay hidden">
-        <div class="alert-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <div class="alert-icon"><i class="bi bi-exclamation-triangle-fill" style="font-size: 50px;"></i></div>
         <h1 class="fw-bold display-4">MISSING!</h1>
-        <h3 id="misName" class="fw-bold opacity-75 mt-2">Scout Name</h3>
-        <button onclick="closeMissing()"
-            class="btn btn-light text-danger fw-bold rounded-pill px-5 py-3 mt-5 shadow">DISMISS ALERT</button>
+        <h3 id="misName" class="fw-bold opacity-75 mt-2">Name</h3>
+        <button onclick="closeMissing()" class="btn btn-light text-danger fw-bold rounded-pill px-5 py-3 mt-5">DISMISS</button>
     </div>
 
     <script type="module">
@@ -391,55 +200,35 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, onValue, push, serverTimestamp, get, update, query, orderByChild, equalTo, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIG
         const firebaseConfig = { apiKey: "AIzaSyCIrXtwckl-4RPOXDn5IOMiHFh_uXdPiKQ", authDomain: "scoutpass-276cb.firebaseapp.com", projectId: "scoutpass-276cb", databaseURL: "https://scoutpass-276cb-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getDatabase(app);
 
-        // STATE
         let html5QrCode;
         let selectedEvent = null;
         let lastScanTime = 0;
         let lastCode = null;
-        let activeCameraId = null;
 
         // AUTH
         window.staffLogin = () => {
             const e = document.getElementById('stfEmail').value;
             const p = document.getElementById('stfPass').value;
-            if (!e || !p) return Swal.fire('Error', 'Please fill all fields', 'warning');
-            signInWithEmailAndPassword(auth, e, p).catch(err => Swal.fire('Login Failed', 'Check email/password', 'error'));
+            signInWithEmailAndPassword(auth, e, p).catch(err => Swal.fire('Error', 'Login Failed', 'error'));
         }
         window.signOut = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
-            const login = document.getElementById('loginScreen');
-            const main = document.getElementById('mainScreen');
             if (user) {
-                login.classList.add('hidden');
-                main.classList.remove('hidden');
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainScreen').classList.remove('hidden');
                 initScanner();
                 loadEvents();
             } else {
-                login.classList.remove('hidden');
-                main.classList.add('hidden');
-                if (html5QrCode) html5QrCode.stop();
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('mainScreen').classList.add('hidden');
             }
         });
 
-        // SYSTEM LOCK
-        onValue(ref(db, 'system_settings/scanning_active'), (snap) => {
-            const isActive = snap.val();
-            const overlay = document.getElementById('lockedOverlay');
-            if (isActive === false) { // Explicit check
-                overlay.classList.remove('hidden');
-                if (html5QrCode) html5QrCode.pause();
-            } else {
-                overlay.classList.add('hidden');
-                if (html5QrCode && html5QrCode.isPaused) html5QrCode.resume();
-            }
-        });
-
-        // EVENTS
+        // LOAD EVENTS
         function loadEvents() {
             onValue(ref(db, 'events'), (snap) => {
                 const sel = document.getElementById('eventSelect');
@@ -448,8 +237,7 @@
                     Object.entries(snap.val()).forEach(([key, val]) => {
                         if (val.active && !val.isDeleted) {
                             const opt = document.createElement('option');
-                            opt.value = key;
-                            opt.text = val.name;
+                            opt.value = key; opt.text = val.name;
                             opt.dataset.btns = val.buttons.join(',');
                             opt.dataset.onetime = val.isOneTime;
                             sel.appendChild(opt);
@@ -461,39 +249,48 @@
 
         window.updateEvent = () => {
             const sel = document.getElementById('eventSelect');
-            if (sel.selectedIndex <= 0) return;
             const opt = sel.options[sel.selectedIndex];
-            selectedEvent = {
-                name: opt.text,
-                buttons: opt.dataset.btns.split(','),
-                isOneTime: opt.dataset.onetime === 'true'
-            };
+            selectedEvent = { name: opt.text, buttons: opt.dataset.btns.split(','), isOneTime: opt.dataset.onetime === 'true' };
         }
 
-        // CAMERA
+        // CAMERA CONTROL LOGIC
         async function initScanner() {
             try {
                 const devices = await Html5Qrcode.getCameras();
-                if (devices && devices.length) {
-                    // Prefer back camera
-                    const backCam = devices.find(d => d.label.toLowerCase().includes('back')) || devices[0];
-                    activeCameraId = backCam.id;
-                    document.getElementById('cameraName').innerText = backCam.label.split(' ')[0] || "Camera";
+                const camSelect = document.getElementById('camSelect');
+                camSelect.innerHTML = '';
 
-                    html5QrCode = new Html5Qrcode("reader");
-                    await html5QrCode.start(
-                        activeCameraId,
-                        { fps: 20, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
-                        onScanSuccess,
-                        () => { } // Ignore failures
-                    );
+                if (devices && devices.length) {
+                    devices.forEach((camera, index) => {
+                        const opt = document.createElement('option');
+                        opt.value = camera.id;
+                        opt.text = camera.label || `Camera ${index + 1}`;
+                        camSelect.appendChild(opt);
+                    });
+
+                    // Start with the first camera (usually the main back camera)
+                    startCamera(devices[0].id);
                 } else {
-                    Swal.fire('Error', 'No camera found', 'error');
+                    Swal.fire('Error', 'No cameras found', 'error');
                 }
             } catch (err) {
-                console.error(err);
-                Swal.fire('Permission Error', 'Camera access denied', 'error');
+                Swal.fire('Error', 'Camera access denied', 'error');
             }
+        }
+
+        async function startCamera(cameraId) {
+            if (html5QrCode) { await html5QrCode.stop(); }
+            html5QrCode = new Html5Qrcode("reader");
+            await html5QrCode.start(
+                cameraId,
+                { fps: 20, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+                onScanSuccess,
+                () => {}
+            );
+        }
+
+        window.switchCamera = (cameraId) => {
+            if (cameraId) startCamera(cameraId).catch(e => Swal.fire('Error', 'Could not switch camera', 'error'));
         }
 
         window.toggleFlash = () => {
@@ -503,145 +300,75 @@
             }
         }
 
-        // SCAN LOGIC
-        window.handleManual = () => onScanSuccess(document.getElementById('manualInput').value);
-
+        // SCAN SUCCESS (Optimized with Scout's lastLog check)
         async function onScanSuccess(decodedText) {
             const now = Date.now();
-            if (!selectedEvent) return Swal.fire({ toast: true, position: 'top', icon: 'warning', title: 'Select an Event first!' });
-            if (decodedText === lastCode && (now - lastScanTime < 3000)) return; // Debounce
+            if (!selectedEvent) return Swal.fire({ toast: true, position: 'top', icon: 'warning', title: 'Select Event!' });
+            if (decodedText === lastCode && (now - lastScanTime < 3000)) return;
 
-            lastScanTime = now;
-            lastCode = decodedText;
-
-            // Haptic feedback
+            lastScanTime = now; lastCode = decodedText;
             if (navigator.vibrate) navigator.vibrate(50);
-
             html5QrCode.pause();
 
-            // Fetch Scout
             const safeKey = decodedText.replace(/[.#$/[\]]/g, '_');
             const snap = await get(ref(db, `scouts/${safeKey}`));
 
             if (snap.exists()) {
                 const scout = snap.val();
-
-                // 1. Check Missing
                 if (scout.isMissing) {
-                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                     document.getElementById('misName').innerText = scout.name;
                     document.getElementById('missingAlert').classList.remove('hidden');
                     return;
                 }
 
-                // 2. Check One-Time
-                if (selectedEvent.isOneTime) {
-                    const logQuery = query(ref(db, 'logs'), orderByChild('scoutID'), equalTo(scout.id));
-                    const logsSnap = await get(logQuery);
-                    if (logsSnap.exists()) {
-                        const hasDone = Object.values(logsSnap.val()).some(l => l.eventName === selectedEvent.name);
-                        if (hasDone) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Already Done!',
-                                text: `${scout.name} has already scanned.`,
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => html5QrCode.resume());
-                            return;
-                        }
-                    }
+                // OPTIMIZATION: Check One-Time via scout profile directly
+                if (selectedEvent.isOneTime && scout.lastLog && scout.lastLog.event === selectedEvent.name) {
+                    Swal.fire({ icon: 'warning', title: 'Already Done!', text: `${scout.name} has already scanned.`, timer: 2000, showConfirmButton: false }).then(() => html5QrCode.resume());
+                    return;
                 }
 
-                // 3. Show Action Modal
                 document.getElementById('resName').innerText = scout.name;
                 document.getElementById('resID').innerText = scout.id;
-
                 const btnContainer = document.getElementById('actionButtons');
                 btnContainer.innerHTML = '';
-
                 selectedEvent.buttons.forEach(btnLabel => {
                     const btn = document.createElement('button');
                     btn.innerText = btnLabel;
-
-                    // Style based on action
-                    let btnClass = 'action-btn btn-neutral';
-                    if (btnLabel === 'IN') btnClass = 'action-btn btn-in';
-                    if (btnLabel === 'OUT') btnClass = 'action-btn btn-out';
-
-                    btn.className = btnClass;
+                    btn.className = `action-btn ${btnLabel === 'IN' ? 'btn-in' : (btnLabel === 'OUT' ? 'btn-out' : 'btn-light border')}`;
                     btn.onclick = () => submitScan(scout, btnLabel);
                     btnContainer.appendChild(btn);
                 });
-
                 document.getElementById('resultModal').classList.remove('hidden');
-
             } else {
-                if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid ID',
-                    text: 'Scout not found in database',
-                    timer: 1500,
-                    showConfirmButton: false
-                }).then(() => html5QrCode.resume());
+                Swal.fire({ icon: 'error', title: 'Invalid ID', timer: 1500, showConfirmButton: false }).then(() => html5QrCode.resume());
             }
-            document.getElementById('manualInput').value = '';
         }
 
-        // SUBMIT
         async function submitScan(scout, action) {
             try {
                 const todayStr = new Date().toISOString().split('T')[0];
                 const updates = {};
                 const newLogKey = push(ref(db, 'logs')).key;
+                const scoutKey = scout.id.replace(/[.#$/[\]]/g, '_');
 
-                // Log
-                updates[`logs/${newLogKey}`] = {
-                    scoutID: scout.id,
-                    scoutName: scout.name,
-                    eventName: selectedEvent.name,
-                    action: action,
-                    timestamp: serverTimestamp(),
-                    scannedBy: auth.currentUser.email
-                };
-
-                // Atomic Counters
+                updates[`logs/${newLogKey}`] = { scoutID: scout.id, scoutName: scout.name, eventName: selectedEvent.name, action: action, timestamp: serverTimestamp(), scannedBy: auth.currentUser.email };
+                updates[`scouts/${scoutKey}/lastLog`] = { event: selectedEvent.name, action: action, time: serverTimestamp() };
                 updates['stats/total_scans'] = increment(1);
                 updates[`stats/daily/${todayStr}`] = increment(1);
                 updates[`stats/events/${selectedEvent.name}/total`] = increment(1);
 
-                if (action === 'IN') {
-                    updates['stats/inside_count'] = increment(1);
-                    updates[`stats/events/${selectedEvent.name}/in`] = increment(1);
-                } else if (action === 'OUT') {
-                    updates['stats/inside_count'] = increment(-1);
-                    updates[`stats/events/${selectedEvent.name}/out`] = increment(1);
-                }
+                if (action === 'IN') { updates['stats/inside_count'] = increment(1); updates[`stats/events/${selectedEvent.name}/in`] = increment(1); }
+                else if (action === 'OUT') { updates['stats/inside_count'] = increment(-1); updates[`stats/events/${selectedEvent.name}/out`] = increment(1); }
 
                 await update(ref(db), updates);
-
                 closeModal();
-
-                // Success feedback
-                const Toast = Swal.mixin({ toast: true, position: 'bottom', showConfirmButton: false, timer: 1500 });
-                Toast.fire({ icon: 'success', title: 'Scanned Successfully' });
-
-            } catch (e) {
-                console.error(e);
-                alert('Connection Error: ' + e.message);
-            }
+                Swal.fire({ toast: true, position: 'bottom', icon: 'success', title: 'Success', showConfirmButton: false, timer: 1000 });
+            } catch (e) { alert('Error: ' + e.message); }
         }
 
-        window.closeModal = () => {
-            document.getElementById('resultModal').classList.add('hidden');
-            setTimeout(() => html5QrCode.resume(), 300);
-        }
-
-        window.closeMissing = () => {
-            document.getElementById('missingAlert').classList.add('hidden');
-            html5QrCode.resume();
-        }
+        window.closeModal = () => { document.getElementById('resultModal').classList.add('hidden'); setTimeout(() => html5QrCode.resume(), 300); }
+        window.closeMissing = () => { document.getElementById('missingAlert').classList.add('hidden'); html5QrCode.resume(); }
+        window.handleManual = () => onScanSuccess(document.getElementById('manualInput').value);
     </script>
 </body>
 
