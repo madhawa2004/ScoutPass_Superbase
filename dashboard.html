@@ -267,7 +267,7 @@
                         <div class="stat-icon" style="background:#E0F2FE; color:#0284C7"><i
                                 class="bi bi-people-fill"></i></div>
                         <div class="text-uppercase small fw-bold text-muted mb-2">Total Registered</div>
-                        <div class="stat-value" id="statTotalScouts">0</div>
+                        <div class="stat-value" id="statTotalScouts">Loading...</div>
                     </div>
                 </div>
             </div>
@@ -318,10 +318,13 @@
         <div id="sec-directory" class="section" style="display:none;">
             <div class="stat-card">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="fw-bold m-0">Scout Directory</h5>
-                    <div class="text-muted small">Total: <span id="dirCount">0</span></div>
-                </div><input type="text" id="searchDir" class="form-control mb-3" placeholder="Search by Name or ID..."
-                    onkeyup="filterDirectory()">
+                    <h5 class="fw-bold m-0">Scout Directory (Search Optimized)</h5>
+                </div>
+                <div class="alert alert-info small"><i class="bi bi-info-circle-fill me-2"></i>To manage a scout, type
+                    their <strong>ID Number</strong> below.</div>
+                <input type="text" id="searchDir" class="form-control mb-3 fw-bold font-monospace"
+                    placeholder="Type ID Number (e.g. KG15...) and press Enter" onkeyup="handleSearchKey(event)">
+
                 <div class="table-responsive">
                     <table class="table align-middle table-hover custom-table">
                         <thead>
@@ -332,7 +335,12 @@
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody id="dirTable"></tbody>
+                        <tbody id="dirTable">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Type an ID above to search database.
+                                </td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -347,11 +355,7 @@
                             placeholder="Format:&#10;KG15/001, Kamal Perera"></textarea><button
                             class="btn btn-primary w-100 mb-3" onclick="processBulkSafely()">Process & Download
                             IDs</button>
-                        <div class="d-flex gap-2"><button class="btn btn-outline-success btn-sm w-50"
-                                onclick="exportData()">Backup DB</button><button
-                                class="btn btn-outline-secondary btn-sm w-50"
-                                onclick="document.getElementById('importFile').click()">Restore DB</button></div>
-                    </div>
+                        </div>
                     <div class="col-md-6 ps-md-4">
                         <h6 class="fw-bold mb-3">Recently Registered</h6>
                         <div style="max-height: 400px; overflow-y: auto;">
@@ -467,12 +471,13 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signOut, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, set, push, serverTimestamp, get, remove, update, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push, serverTimestamp, get, remove, update, query, limitToLast, orderByChild, startAt, endAt, limitToFirst } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCIrXtwckl-4RPOXDn5IOMiHFh_uXdPiKQ", authDomain: "scoutpass-276cb.firebaseapp.com", projectId: "scoutpass-276cb", databaseURL: "https://scoutpass-276cb-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getDatabase(app); const secondaryApp = initializeApp(firebaseConfig, "Secondary"); const secondaryAuth = getAuth(secondaryApp);
 
-        let allScouts = [], allEvents = [], globalStats = {}; let currentUserRole = 'admin'; let selectedScoutData = null;
+        // OPTIMIZATION: Removed global allScouts array.
+        let allEvents = [], globalStats = {}; let currentUserRole = 'admin'; let selectedScoutData = null;
 
         setInterval(() => { const now = new Date(); document.getElementById('clock').innerText = now.toLocaleTimeString(); document.getElementById('dateDisplay').innerText = now.toLocaleDateString(); }, 1000);
 
@@ -487,13 +492,22 @@
                     document.getElementById('loading-screen').style.display = 'none';
                 }
                 set(ref(db, `presence/${user.uid}`), { email: user.email, online: true });
+                fetchTotalScoutCount(); // Fetch count once on load
             }
         });
 
-        onValue(ref(db, 'scouts'), (s) => { allScouts = s.exists() ? Object.values(s.val()) : []; document.getElementById('statTotalScouts').innerText = allScouts.length; document.getElementById('dirCount').innerText = allScouts.length; updateDirectory(); });
+        // OPTIMIZATION: Fetch total count only once, not listening to the whole node
+        async function fetchTotalScoutCount() {
+            //This is a rough estimate for high-load, accurate count requires specialized DB structure
+             get(ref(db, 'stats/total_registered')).then(s => {
+                 document.getElementById('statTotalScouts').innerText = s.exists() ? s.val() : "N/A";
+             });
+        }
+
+        // OPTIMIZATION: Listeners for stats and logs only
         onValue(ref(db, 'stats'), (s) => { globalStats = s.val() || {}; document.getElementById('statTotalScans').innerText = globalStats.total_scans || 0; document.getElementById('statInside').innerText = Math.max(0, globalStats.inside_count || 0); const todayStr = new Date().toISOString().split('T')[0]; document.getElementById('statTodayScans').innerText = (globalStats.daily && globalStats.daily[todayStr]) ? globalStats.daily[todayStr] : 0; renderEventCards(); });
         onValue(ref(db, 'events'), (s) => { const data = s.val(); allEvents = data ? Object.entries(data).map(([key, val]) => ({ key, ...val })) : []; renderEventsList(); renderEventCards(); });
-        onValue(query(ref(db, 'logs'), limitToLast(50)), (s) => { const list = document.getElementById('liveLogsBody'); list.innerHTML = ""; if (s.exists()) { Object.values(s.val()).reverse().forEach(l => { let badge = `<span class="badge bg-light text-dark border">SCAN</span>`; if (l.action === 'IN') badge = `<span class="badge bg-success bg-opacity-10 text-success border border-success">IN</span>`; if (l.action === 'OUT') badge = `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger">OUT</span>`; list.innerHTML += `<tr><td>${new Date(l.timestamp).toLocaleTimeString()}</td><td class="fw-bold text-primary">${l.scoutName}</td><td>${l.eventName}</td><td>${badge}</td><td class="text-muted small">${l.scannedBy ? l.scannedBy.split('@')[0] : 'System'}</td></tr>`; }); } else { list.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No recent activity</td></tr>`; } });
+        onValue(query(ref(db, 'logs'), limitToLast(20)), (s) => { const list = document.getElementById('liveLogsBody'); list.innerHTML = ""; if (s.exists()) { Object.values(s.val()).reverse().forEach(l => { let badge = `<span class="badge bg-light text-dark border">SCAN</span>`; if (l.action === 'IN') badge = `<span class="badge bg-success bg-opacity-10 text-success border border-success">IN</span>`; if (l.action === 'OUT') badge = `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger">OUT</span>`; list.innerHTML += `<tr><td>${new Date(l.timestamp).toLocaleTimeString()}</td><td class="fw-bold text-primary">${l.scoutName}</td><td>${l.eventName}</td><td>${badge}</td><td class="text-muted small">${l.scannedBy ? l.scannedBy.split('@')[0] : 'System'}</td></tr>`; }); } else { list.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No recent activity</td></tr>`; } });
 
         function renderEventCards() {
             const container = document.getElementById('liveEventCards'); container.innerHTML = ""; if (allEvents.length === 0) { container.innerHTML = `<div class="col-12 text-center text-muted">No events active.</div>`; return; }
@@ -505,12 +519,64 @@
             });
         }
 
-        function updateDirectory() { const tbody = document.getElementById('dirTable'); let h = ''; allScouts.slice().reverse().slice(0, 100).forEach(sc => { const safeKey = sc.id.replace(/[.#$/[\]]/g, '_'); const status = sc.isMissing ? '<span class="badge bg-danger rounded-pill">MISSING</span>' : '<span class="badge bg-success rounded-pill">Active</span>'; h += `<tr onclick="viewScout('${safeKey}')"><td class="fw-bold font-monospace">${sc.id}</td><td class="fw-bold text-primary">${sc.name}</td><td>${sc.troop || '-'}</td><td>${status}</td></tr>`; }); tbody.innerHTML = h; }
-        window.filterDirectory = () => { const term = document.getElementById('searchDir').value.toLowerCase(); const tbody = document.getElementById('dirTable'); tbody.innerHTML = ''; const filtered = allScouts.filter(s => s.name.toLowerCase().includes(term) || s.id.toLowerCase().includes(term)).slice(0, 50); filtered.forEach(sc => { const safeKey = sc.id.replace(/[.#$/[\]]/g, '_'); const status = sc.isMissing ? '<span class="badge bg-danger">MISSING</span>' : '<span class="badge bg-success">Active</span>'; tbody.innerHTML += `<tr onclick="viewScout('${safeKey}')"><td>${sc.id}</td><td class="fw-bold text-primary">${sc.name}</td><td>${sc.troop || '-'}</td><td>${status}</td></tr>`; }); };
+        // OPTIMIZATION: New Database Search Function
+        window.handleSearchKey = (e) => { if(e.key === 'Enter') searchDatabase(); }
 
-        window.viewScout = (safeKey) => { const sc = allScouts.find(s => s.id.replace(/[.#$/[\]]/g, '_') === safeKey); if (sc) { selectedScoutData = sc; document.getElementById('panelName').innerText = sc.name; document.getElementById('panelID').innerText = `ID: ${sc.id}`; document.getElementById('panelTroop').innerText = `Troop: ${sc.troop || '-'}`; const btn = document.getElementById('btnToggleMissing'); if (sc.isMissing) { btn.className = "btn btn-success py-3 fw-bold"; btn.innerHTML = '<i class="bi bi-shield-check-fill me-2"></i> Mark Found (Safe)'; } else { btn.className = "btn btn-outline-danger py-3 fw-bold"; btn.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i> Report Missing'; } new bootstrap.Offcanvas(document.getElementById('scoutOffcanvas')).show(); } };
+        window.searchDatabase = async () => {
+            const term = document.getElementById('searchDir').value.trim();
+            const tbody = document.getElementById('dirTable');
+
+            if (term.length < 2) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-warning">Please type at least 2 characters of the ID.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm me-2"></div>Searching Database...</td></tr>';
+
+            try {
+                // NOTE: This requires Firebase Indexing on 'id'. See instructions.
+                // Searches for IDs starting with the term.
+                const q = query(ref(db, 'scouts'), orderByChild('id'), startAt(term), endAt(term + "\uf8ff"), limitToFirst(20));
+                const snapshot = await get(q);
+
+                tbody.innerHTML = '';
+                if (snapshot.exists()) {
+                    snapshot.forEach(childSnapshot => {
+                        const sc = childSnapshot.val();
+                        const safeKey = sc.id.replace(/[.#$/[\]]/g, '_');
+                        const status = sc.isMissing ? '<span class="badge bg-danger rounded-pill">MISSING</span>' : '<span class="badge bg-success rounded-pill">Active</span>';
+                        tbody.innerHTML += `<tr onclick="viewScout('${safeKey}')"><td class="fw-bold font-monospace">${sc.id}</td><td class="fw-bold text-primary">${sc.name}</td><td>${sc.troop || '-'}</td><td>${status}</td></tr>`;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No scouts found matching that ID.</td></tr>';
+                }
+            } catch (error) {
+                console.error("Search Error:", error);
+                 tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4">Search failed. Indexing may be missing.<br><small>${error.message}</small></td></tr>`;
+            }
+        };
+
+        window.viewScout = async (safeKey) => {
+            // OPTIMIZATION: Fetch single scout data on demand
+            const snap = await get(ref(db, `scouts/${safeKey}`));
+            if (snap.exists()) {
+                const sc = snap.val();
+                selectedScoutData = sc;
+                document.getElementById('panelName').innerText = sc.name;
+                document.getElementById('panelID').innerText = `ID: ${sc.id}`;
+                document.getElementById('panelTroop').innerText = `Troop: ${sc.troop || '-'}`;
+                const btn = document.getElementById('btnToggleMissing');
+                if (sc.isMissing) {
+                    btn.className = "btn btn-success py-3 fw-bold"; btn.innerHTML = '<i class="bi bi-shield-check-fill me-2"></i> Mark Found (Safe)';
+                } else {
+                    btn.className = "btn btn-outline-danger py-3 fw-bold"; btn.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i> Report Missing';
+                }
+                new bootstrap.Offcanvas(document.getElementById('scoutOffcanvas')).show();
+            }
+        };
+
         window.toggleMissingFromPanel = async () => { if (!selectedScoutData) return; const safeKey = selectedScoutData.id.replace(/[.#$/[\]]/g, '_'); const newState = !selectedScoutData.isMissing; await update(ref(db, `scouts/${safeKey}`), { isMissing: newState }); if (newState) push(ref(db, 'alerts'), { scoutName: selectedScoutData.name, timestamp: serverTimestamp() }); viewScout(safeKey); };
-        window.deleteScoutFromPanel = async () => { if (!selectedScoutData) return; const result = await Swal.fire({ title: 'Delete Profile?', text: "This cannot be undone!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Yes, Delete' }); if (result.isConfirmed) { const safeKey = selectedScoutData.id.replace(/[.#$/[\]]/g, '_'); await remove(ref(db, `scouts/${safeKey}`)); bootstrap.Offcanvas.getInstance(document.getElementById('scoutOffcanvas')).hide(); Swal.fire('Deleted', 'Scout removed.', 'success'); } };
+        window.deleteScoutFromPanel = async () => { if (!selectedScoutData) return; const result = await Swal.fire({ title: 'Delete Profile?', text: "This cannot be undone!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Yes, Delete' }); if (result.isConfirmed) { const safeKey = selectedScoutData.id.replace(/[.#$/[\]]/g, '_'); await remove(ref(db, `scouts/${safeKey}`)); bootstrap.Offcanvas.getInstance(document.getElementById('scoutOffcanvas')).hide(); Swal.fire('Deleted', 'Scout removed.', 'success'); searchDatabase(); /*Refresh search results*/ } };
 
         window.addStaff = async () => { try { const c = await createUserWithEmailAndPassword(secondaryAuth, document.getElementById('stfEmail').value, document.getElementById('stfPass').value); await set(ref(db, `users/${c.user.uid}`), { email: c.user.email, role: document.getElementById('stfRole').value }); Swal.fire('Success', 'User Created', 'success'); } catch (e) { Swal.fire('Error', e.message, 'error'); } };
         onValue(ref(db, 'users'), s => { const t = document.getElementById('staffTable'); t.innerHTML = ""; if (s.exists()) Object.entries(s.val()).forEach(([k, v]) => { const delBtn = currentUserRole === 'admin' ? `<button onclick="removeUser('${k}')" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash-fill"></i></button>` : ''; t.innerHTML += `<tr><td>${v.email}</td><td><span class="badge bg-light text-dark border">${v.role}</span></td><td>${delBtn}</td></tr>`; }); });
@@ -525,14 +591,18 @@
         window.addEvent = async () => { const n = document.getElementById('evtName').value, t = document.getElementById('evtType').value, b = document.getElementById('evtButtons').value; if (n) { await push(ref(db, 'events'), { name: n, type: t, buttons: b.split(','), active: true, isOneTime: document.getElementById('evtOneTime').checked, isDeleted: false }); document.getElementById('evtName').value = ''; } };
         function renderEventsList() { let h = ''; allEvents.forEach(e => { if (e.isDeleted) return; h += `<div class="event-item"><div><strong>${e.name}</strong><br><small class="text-muted">${e.type}</small></div><button onclick="removeEvent('${e.key}')" class="btn btn-sm text-danger admin-only"><i class="bi bi-trash"></i></button></div>`; }); document.getElementById('eventsList').innerHTML = h; }
         window.removeEvent = async (k) => { if (confirm('Delete Event?')) update(ref(db, `events/${k}`), { isDeleted: true }); };
-        window.initiateSystemReset = async () => { const p = prompt("Type password:"); if (p === "MadhawaBasnayake@20041110") { await remove(ref(db, 'scouts')); await remove(ref(db, 'logs')); await remove(ref(db, 'events')); await remove(ref(db, 'alerts')); await set(ref(db, 'stats'), { total_scans: 0, inside_count: 0, daily: {} }); alert('System Wiped'); } };
+        window.initiateSystemReset = async () => { const p = prompt("Type password:"); if (p === "MadhawaBasnayake@20041110") { await remove(ref(db, 'scouts')); await remove(ref(db, 'logs')); await remove(ref(db, 'events')); await remove(ref(db, 'alerts')); await set(ref(db, 'stats'), { total_scans: 0, inside_count: 0, daily: {}, total_registered: 0 }); alert('System Wiped'); } };
 
         window.showSection = (id, el) => { document.querySelectorAll('.section').forEach(d => d.style.display = 'none'); document.getElementById('sec-' + id).style.display = 'block'; document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); if (el) el.classList.add('active'); document.getElementById('pageTitle').innerText = id === 'overview' ? 'Dashboard' : id.charAt(0).toUpperCase() + id.slice(1); };
-        window.processBulkSafely = async function () { const text = document.getElementById('bulkText').value; const lines = text.trim().split('\n'); const updates = {}; const list = []; lines.forEach(l => { const p = l.split(','); if (p.length >= 2) { const id = p[0].trim(); const name = p.slice(1).join(',').trim(); if (id && name) { const k = id.replace(/[.#$/[\]]/g, '_'); const obj = { id: id, name: name, troop: "-", isMissing: false }; updates[`scouts/${k}`] = obj; list.push(obj); } } }); await update(ref(db), updates); Swal.fire('Success', `Registered ${list.length} scouts`, 'success'); downloadBatchPDF(list, 'New_IDs'); };
+        
+        window.processBulkSafely = async function () { const text = document.getElementById('bulkText').value; const lines = text.trim().split('\n'); const updates = {}; const list = []; lines.forEach(l => { const p = l.split(','); if (p.length >= 2) { const id = p[0].trim(); const name = p.slice(1).join(',').trim(); if (id && name) { const k = id.replace(/[.#$/[\]]/g, '_'); const obj = { id: id, name: name, troop: "-", isMissing: false }; updates[`scouts/${k}`] = obj; list.push(obj); } } }); 
+        // OPTIMIZATION: Update total count counter
+        updates['stats/total_registered'] = firebase.database.ServerValue.increment(list.length);
+        await update(ref(db), updates); Swal.fire('Success', `Registered ${list.length} scouts`, 'success'); downloadBatchPDF(list, 'New_IDs'); fetchTotalScoutCount(); };
+
         window.downloadBatchPDF = function (scoutList, filename) { if (!scoutList || scoutList.length === 0) return; const { jsPDF } = window.jspdf; const doc = new jsPDF(); const qrDiv = document.getElementById('qr-hidden'); let col = 0, row = 0; const cardW = 45, cardH = 65, marginX = 15, marginY = 15; scoutList.forEach((s, i) => { if (i > 0 && i % 16 === 0) { doc.addPage(); col = 0; row = 0; } qrDiv.innerHTML = ""; new QRCode(qrDiv, { text: s.id, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M }); const img = qrDiv.querySelector('canvas').toDataURL("image/png"); const x = marginX + (col * (cardW + 2)); const y = marginY + (row * (cardH + 2)); const centerX = x + (cardW / 2); doc.setLineWidth(0.1); doc.rect(x, y, cardW, cardH); doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.text("SCOUT PASS", centerX, y + 6, { align: "center" }); doc.addImage(img, 'PNG', x + 5, y + 8, 35, 35); doc.setFontSize(10); doc.text(s.id, centerX, y + 49, { align: "center" }); doc.setFontSize(8); doc.setFont("helvetica", "normal"); let printName = s.name.length > 18 ? s.name.substring(0, 16) + '..' : s.name; doc.text(printName, centerX, y + 54, { align: "center" }); doc.setFontSize(6); doc.setTextColor(150); doc.text("SCAN TO VERIFY", centerX, y + 60, { align: "center" }); doc.setTextColor(0); col++; if (col >= 4) { col = 0; row++; } }); doc.save(`${filename}.pdf`); }
         window.downloadSingleID = () => selectedScoutData && downloadBatchPDF([selectedScoutData], selectedScoutData.id.replace(/[.#$/[\]]/g, '_'));
-        window.exportData = function () { if (allScouts.length === 0) return Swal.fire('Empty', 'No data', 'info'); const dataStr = JSON.stringify(allScouts, null, 2); const blob = new Blob([dataStr], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `ScoutDB_Backup.json`; a.click(); }
-        window.importData = function (input) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async function (e) { try { const data = JSON.parse(e.target.result); const updates = {}; data.forEach(s => { const k = s.id.replace(/[.#$/[\]]/g, '_'); updates[`scouts/${k}`] = s; }); await update(ref(db), updates); Swal.fire('Success', `Restored ${data.length} records.`, 'success'); } catch (err) { Swal.fire('Error', 'Invalid File', 'error'); } input.value = ''; }; reader.readAsText(file); }
+        // Removed Export/Import buttons for high-load safety against massive data dumps browser-side.
         window.logout = () => signOut(auth).then(() => window.location.href = "index.html");
     </script>
 </body>
